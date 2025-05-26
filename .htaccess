@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /githab/
+
+# If the requested filename doesn't exist, redirect to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+
+# Set headers for assets
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
+    Header set Cache-Control "max-age=604800, public"
+</FilesMatch>
