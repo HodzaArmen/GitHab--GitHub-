@@ -125,11 +125,6 @@ class IssueController {
         
         $repo = RepoDB::get($issue["repo_id"]);
         
-        if (!$repo["is_public"] && (!isset($_SESSION["user_id"]) || $repo["user_id"] != $_SESSION["user_id"])) {
-            ViewHelper::redirect(BASE_URL . "login");
-            return;
-        }
-        
         $comments = IssueDB::getComments($issue["id"]);
         $commentAuthors = [];
         foreach ($comments as $comment) {
@@ -185,26 +180,42 @@ class IssueController {
     }
 
     public static function updateStatus() {
-        if (!isset($_POST["id"]) || !isset($_POST["status"])) {
-            ViewHelper::error404();
-            return;
-        }
-        
         if (!isset($_SESSION["user_id"])) {
             ViewHelper::redirect(BASE_URL . "login");
             return;
         }
-        
-        $issueId = $_POST["id"];
-        $issue = IssueDB::get($issueId);
-        
+
+        if (!isset($_POST["id"]) || !isset($_POST["status"])) {
+            ViewHelper::error400("Missing id or status");
+            return;
+        }
+
+        $issue = IssueDB::get($_POST["id"]);
         if (!$issue) {
             ViewHelper::error404();
             return;
         }
-        
-        IssueDB::updateStatus($issueId, $_POST["status"]);
-        
-        ViewHelper::redirect(BASE_URL . "issue/detail?id=" . $issueId);
+
+        $repo = RepoDB::get($issue["repo_id"]);
+        if (!$repo) {
+            ViewHelper::error404();
+            return;
+        }
+
+        // Check if the user is the owner of the repository
+        if ($repo["user_id"] != $_SESSION["user_id"]) {
+            ViewHelper::error403();
+            return;
+        }
+
+        $status = $_POST["status"];
+        if ($status !== "open" && $status !== "closed") {
+            ViewHelper::error400("Invalid status value");
+            return;
+        }
+
+        IssueDB::updateStatus($_POST["id"], $status);
+
+        ViewHelper::redirect(BASE_URL . "issue/detail?id=" . $_POST["id"]);
     }
 }

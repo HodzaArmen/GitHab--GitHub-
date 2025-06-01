@@ -40,6 +40,26 @@ class ViewHelper
         echo $html404;
     }
 
+    public static function error403()
+    {
+        header('HTTP/1.1 403 Forbidden');
+        $html403 = sprintf("<!doctype html>\n" .
+            "<title>Error 403: Forbidden</title>\n" .
+            "<h1>Error 403: Forbidden</h1>\n" .
+            "<p>You do not have permission to access <i>%s</i>.</p>", $_SERVER["REQUEST_URI"]);
+        echo $html403;
+    }
+    
+    public static function error400($message = "Bad Request")
+    {
+        header('HTTP/1.1 400 Bad Request');
+        $html400 = sprintf("<!doctype html>\n" .
+            "<title>Error 400: Bad Request</title>\n" .
+            "<h1>Error 400: Bad Request</h1>\n" .
+            "<p>%s</p>", htmlspecialchars($message));
+        echo $html400;
+    }
+
     public static function isAjax()
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&

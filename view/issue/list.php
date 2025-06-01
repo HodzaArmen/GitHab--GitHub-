@@ -56,11 +56,9 @@
         </li>
     </ul>
     <div class="d-flex justify-content-between align-items-center mb-4">        
-        <?php if ($canEdit): ?>
-            <a href="<?= BASE_URL ?>issue/create?repo_id=<?= $repo['id'] ?>" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> New issue
-            </a>
-        <?php endif; ?>
+        <a href="<?= BASE_URL ?>issue/create?repo_id=<?= $repo['id'] ?>" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New issue
+        </a>
     </div>
     
     <div class="card mb-4">

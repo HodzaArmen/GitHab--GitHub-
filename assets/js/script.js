@@ -1,11 +1,5 @@
 const BASE_URL = "http://localhost/githab/";
 document.addEventListener('DOMContentLoaded', function () {
-    // Tooltip initialization
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
     // Confirm before deleting
     document.querySelectorAll('.delete-confirm').forEach(function (element) {
         element.addEventListener('click', function (event) {
