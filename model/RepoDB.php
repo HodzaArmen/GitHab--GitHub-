@@ -1,8 +1,10 @@
 <?php
 require_once "DBInit.php";
 
-class RepoDB {
-    public static function get($id) {
+class RepoDB
+{
+    public static function get($id)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("SELECT r.*, u.username 
                              FROM repositories r
@@ -12,7 +14,8 @@ class RepoDB {
         return $stmt->fetch();
     }
 
-    public static function getByUser($userId) {
+    public static function getByUser($userId)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("SELECT r.*, u.username 
                              FROM repositories r
@@ -23,7 +26,8 @@ class RepoDB {
         return $stmt->fetchAll();
     }
 
-    public static function getAllPublic() {
+    public static function getAllPublic()
+    {
         $db = DBInit::getInstance();
         $stmt = $db->query("SELECT r.*, u.username 
                            FROM repositories r
@@ -33,7 +37,8 @@ class RepoDB {
         return $stmt->fetchAll();
     }
 
-    public static function insert($data) {
+    public static function insert($data)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("INSERT INTO repositories 
                              (user_id, name, description, is_public) 
@@ -46,7 +51,8 @@ class RepoDB {
         return $db->lastInsertId();
     }
 
-    public static function update($data) {
+    public static function update($data)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("UPDATE repositories SET 
                              name = :name,
@@ -61,20 +67,47 @@ class RepoDB {
         return $stmt->rowCount();
     }
 
-    public static function delete($id) {
+
+    public static function delete($id)
+    {
         $db = DBInit::getInstance();
+
+        // Delete all files associated with the repository
+        $stmt = $db->prepare("DELETE FROM uploads WHERE repo_id = ?");
+        $stmt->execute([$id]);
+
+        // Delete fork count, if this repo was forked
+        $stmt = $db->prepare("DELETE FROM forks WHERE parent_repo_id = ?");
+        $stmt->execute([$id]);
+
+        // Now delete the repository itself
+        $stmt = $db->prepare("DELETE FROM stars WHERE repo_id = ?");
+        $stmt->execute([$id]);
+        $stmt = $db->prepare("DELETE FROM forks WHERE repo_id = ?");
+        $stmt->execute([$id]);
+        $stmt = $db->prepare("DELETE FROM issue_comments WHERE issue_id IN (SELECT id FROM issues WHERE repo_id = ?)");
+        $stmt->execute([$id]);
+        $stmt = $db->prepare("DELETE FROM issues WHERE repo_id = ?");
+        $stmt->execute([$id]);
+        $stmt = $db->prepare("DELETE FROM commits WHERE repo_id = ?");
+        $stmt->execute([$id]);
+        $stmt = $db->prepare("DELETE FROM branches WHERE repo_id = ?");
+        $stmt->execute([$id]);
         $stmt = $db->prepare("DELETE FROM repositories WHERE id = ?");
         $stmt->execute([$id]);
+
         return $stmt->rowCount();
     }
 
-    public static function insertFile($repoId, $fileName, $filePath) {
+    public static function insertFile($repoId, $fileName, $filePath)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("INSERT INTO uploads (repo_id, file_name, file_path) VALUES (?, ?, ?)");
         $stmt->execute([$repoId, $fileName, $filePath]);
     }
 
-    public static function getFilesByRepoId($repoId) {
+    public static function getFilesByRepoId($repoId)
+    {
         $db = DBInit::getInstance();
         $stmt = $db->prepare("SELECT * FROM uploads WHERE repo_id = ?");
         $stmt->execute([$repoId]);

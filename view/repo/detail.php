@@ -6,7 +6,7 @@
             <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($repo['name']) ?></li>
         </ol>
     </nav>
-    
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>
             <span class="text-muted"><?= htmlspecialchars($repo['username']) ?>/</span>
@@ -15,31 +15,40 @@
                 <?= $repo['is_public'] ? 'Public' : 'Private' ?>
             </span>
         </h1>
-        
+
         <div class="btn-group">
             <?php if ($canEdit): ?>
                 <a href="<?= BASE_URL ?>repo/edit?id=<?= $repo['id'] ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
             <?php endif; ?>
-            
-            <form action="<?= BASE_URL ?>repo/star" method="post" class="ms-2">
+
+            <form method="post" class="star-form ms-2">
                 <input type="hidden" name="repo_id" value="<?= $repo['id'] ?>">
                 <input type="hidden" name="action" value="<?= $isStarred ? 'unstar' : 'star' ?>">
-                <button type="submit" class="btn btn-sm <?= $isStarred ? 'btn-warning' : 'btn-outline-warning' ?> star-button">
-                    <i class="bi bi-star-fill"></i> <?= $isStarred ? 'Starred' : 'Star' ?> (<?= $starCount ?>)
+                <button type="button" class="btn btn-sm <?= $isStarred ? 'btn-warning' : 'btn-outline-warning' ?> star-button">
+                    <i class="bi bi-star-fill"></i> <?= $isStarred ? 'Starred' : 'Star' ?> (<span class="star-count"><?= $starCount ?></span>)
                 </button>
             </form>
-            
+
             <form action="<?= BASE_URL ?>repo/fork" method="post" class="ms-2">
                 <input type="hidden" name="repo_id" value="<?= $repo['id'] ?>">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-diagram-2"></i> Fork (<?= $forkCount ?>)
                 </button>
             </form>
+
+            <?php if ($canEdit): ?>
+                <form action="<?= BASE_URL ?>repo/delete" method="post" class="ms-2">
+                    <input type="hidden" name="repo_id" value="<?= $repo['id'] ?>">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this repository?')">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
-    
+
     <p class="lead"><?= htmlspecialchars($repo['description']) ?></p>
-    
+
     <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
             <a class="nav-link active" href="#">Code</a>
@@ -51,7 +60,7 @@
             <a class="nav-link" href="<?= BASE_URL ?>issue?repo_id=<?= $repo['id'] ?>">Issues</a>
         </li>
     </ul>
-    
+
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="dropdown">
@@ -87,7 +96,7 @@
             <?php endif; ?>
         </div>
     </div>
-    
+
     <h4>Recent Commits</h4>
     <div class="list-group mb-4">
         <?php if (!empty($commits)): ?>
@@ -111,7 +120,7 @@
             <div class="list-group-item">No commits yet</div>
         <?php endif; ?>
     </div>
-    
+
     <div class="row">
         <div class="col-md-6">
             <div class="card">
@@ -124,7 +133,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">

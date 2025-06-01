@@ -25,11 +25,11 @@
                 <a href="<?= BASE_URL ?>repo/edit?id=<?= $repo['id'] ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
             <?php endif; ?>
 
-            <form action="<?= BASE_URL ?>repo/star" method="post" class="ms-2">
+            <form method="post" class="star-form ms-2">
                 <input type="hidden" name="repo_id" value="<?= $repo['id'] ?>">
                 <input type="hidden" name="action" value="<?= $isStarred ? 'unstar' : 'star' ?>">
-                <button type="submit" class="btn btn-sm <?= $isStarred ? 'btn-warning' : 'btn-outline-warning' ?> star-button">
-                    <i class="bi bi-star-fill"></i> <?= $isStarred ? 'Starred' : 'Star' ?> (<?= $starCount ?>)
+                <button type="button" class="btn btn-sm <?= $isStarred ? 'btn-warning' : 'btn-outline-warning' ?> star-button">
+                    <i class="bi bi-star-fill"></i> <?= $isStarred ? 'Starred' : 'Star' ?> (<span class="star-count"><?= $starCount ?></span>)
                 </button>
             </form>
 

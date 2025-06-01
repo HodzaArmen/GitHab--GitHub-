@@ -33,7 +33,11 @@
         <div class="card-body">
             <div class="d-flex mb-4">
                 <div class="flex-shrink-0">
-                    <img src="https://via.placeholder.com/40" alt="Avatar" class="rounded-circle">
+                    <?php if (!empty($issueCreator['avatar_url'])): ?>
+                        <img src="<?= htmlspecialchars($issueCreator['avatar_url']) ?>" alt="Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                    <?php else: ?>
+                        <img src="<?= BASE_URL ?>assets/images/default-avatar.png" alt="Default Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                    <?php endif; ?>
                 </div>
                 <div class="flex-grow-1 ms-3">
                     <strong><?= htmlspecialchars($issue['author_name']) ?></strong>
@@ -53,7 +57,11 @@
                 <?php foreach ($comments as $comment): ?>
                     <div class="d-flex mb-4">
                         <div class="flex-shrink-0">
-                            <img src="https://via.placeholder.com/40" alt="Avatar" class="rounded-circle">
+                            <?php if (isset($commentAuthors[$comment['user_id']]) && !empty($commentAuthors[$comment['user_id']]['avatar_url'])): ?>
+                                <img src="<?= htmlspecialchars($commentAuthors[$comment['user_id']]['avatar_url']) ?>" alt="Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                            <?php else: ?>
+                                <img src="<?= BASE_URL ?>assets/images/default-avatar.png" alt="Default Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                            <?php endif; ?>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <strong><?= htmlspecialchars($comment['author_name']) ?></strong>

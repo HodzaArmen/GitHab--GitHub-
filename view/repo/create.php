@@ -12,7 +12,7 @@
 
                 <div class="mb-3">
                     <label for="file" class="form-label">Upload files</label>
-                    <input type="file" class="form-control" id="file" name="files[]" multiple required>
+                    <input type="file" class="form-control" id="file" name="files[]" multiple webkitdirectory directory>
                 <div class="form-text">You can upload multiple files at once.</div>
 
                 <div class="mb-3">

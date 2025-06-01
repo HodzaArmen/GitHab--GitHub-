@@ -8,7 +8,7 @@
             <a class="btn btn-primary btn-lg" href="<?= BASE_URL ?>register" role="button">Sign up for free</a>
             <a class="btn btn-primary btn-lg" href="<?= BASE_URL ?>login" role="button">Sign in</a>
         <?php else: ?> 
-            <a class="btn btn-primary btn-lg" href="<?= BASE_URL ?>logout" role="button">Logout</a>
+            <a class="btn btn-primary btn-lg btn-danger" href="<?= BASE_URL ?>logout" role="button">Logout</a>
             <a class="btn btn-primary btn-lg" href="<?= BASE_URL ?>repo/create" role="button">Create a repository</a>
             <a class="btn btn-primary btn-lg" href="<?= BASE_URL ?>dashboard" role="button">Go to Dashboard</a>
         <?php endif; ?>

@@ -2,6 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Repositories</h2>
         <?php if (isset($_SESSION["user_id"])): ?>
+            <a href="<?= BASE_URL ?>dashboard" class="btn btn-primary">Back to Dashboard</a>
             <a href="<?= BASE_URL ?>repo/create" class="btn btn-primary">
                 <i class="bi bi-plus-lg"></i> New repository
             </a>

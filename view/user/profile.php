@@ -4,7 +4,14 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h3><?= htmlspecialchars($user['username']) ?></h3>
-
+                    <?php if (!empty($user['avatar_url'])): ?>
+                        <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                    <?php else: ?>
+                        <img src="<?= BASE_URL ?>assets/images/default-avatar.png" alt="Default Avatar" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px;">
+                    <?php endif; ?>
+                    <?php if (!empty($user['bio'])): ?>
+                        <p class="text-muted"><?= htmlspecialchars($user['bio']) ?></p>
+                    <?php endif; ?>
                     <?php if (!empty($user['full_name'])): ?>
                         <p class="text-muted"><?= htmlspecialchars($user['full_name']) ?></p>
                     <?php endif; ?>
@@ -19,30 +26,27 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Gumb za nazaj na dashboard -->
-            <div class="mt-4 text-center">
-                <a href="<?= BASE_URL ?>dashboard" class="btn btn-primary btn-sm">Back to dashboard</a>
-            </div>
         </div>
-        
+
         <div class="col-md-9">
             <h4>Repositories</h4>
             <?php if (!empty($repos)): ?>
                 <div class="list-group">
                     <?php foreach ($repos as $repo): ?>
-                        <a href="<?= htmlspecialchars(BASE_URL . "repo/detail?id=" . $repo['id']) ?>" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1"><?= htmlspecialchars($repo['name']) ?></h5>
-                                <small class="text-muted">Updated <?= ViewHelper::timeElapsed($repo['updated_at']) ?></small>
-                            </div>
-                            <p class="mb-1"><?= htmlspecialchars($repo['description']) ?></p>
-                            <small class="text-muted">
-                                <?php if (empty($repo['is_public']) || $repo['is_public'] == 0): ?>
-                                    <span class="badge bg-secondary">Private</span>
-                                <?php endif; ?>
-                            </small>
-                        </a>
+                        <?php if ($repo['is_public'] == 1 || $isCurrentUser): ?>
+                            <a href="<?= htmlspecialchars(BASE_URL . "repo/detail?id=" . $repo['id']) ?>" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1"><?= htmlspecialchars($repo['name']) ?></h5>
+                                    <small class="text-muted">Updated <?= ViewHelper::timeElapsed($repo['updated_at']) ?></small>
+                                </div>
+                                <p class="mb-1"><?= htmlspecialchars($repo['description']) ?></p>
+                                <small class="text-muted">
+                                    <?php if (empty($repo['is_public']) || $repo['is_public'] == 0): ?>
+                                        <span class="badge bg-secondary">Private</span>
+                                    <?php endif; ?>
+                                </small>
+                            </a>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>

@@ -131,11 +131,20 @@ class IssueController {
         }
         
         $comments = IssueDB::getComments($issue["id"]);
-        
+        $commentAuthors = [];
+        foreach ($comments as $comment) {
+            $user = UserDB::get($comment["user_id"]);
+            $commentAuthors[$comment["user_id"]] = $user;
+        }
+
+        $issueCreator = UserDB::get($issue["user_id"]);
+
         ViewHelper::render("view/issue/detail.php", [
             "issue" => $issue,
             "repo" => $repo,
             "comments" => $comments,
+            "commentAuthors" => $commentAuthors,
+            "issueCreator" => $issueCreator,
             "canEdit" => isset($_SESSION["user_id"]) && ($repo["user_id"] == $_SESSION["user_id"])
         ]);
     }

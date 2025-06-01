@@ -83,6 +83,9 @@ $urls = [
     },
 
     # USER
+    "user" => function() {
+        UserController::index();
+    },
     "user/profile" => function() {
         UserController::profile();
     },

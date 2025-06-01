@@ -215,7 +215,7 @@ class RepoController
 
     public static function delete()
     {
-        if (!isset($_POST["id"])) {
+        if (!isset($_POST["repo_id"])) { // Changed from "id" to "repo_id"
             ViewHelper::error404();
             return;
         }
@@ -225,57 +225,91 @@ class RepoController
             return;
         }
 
-        $repo = RepoDB::get($_POST["id"]);
+        $repo = RepoDB::get($_POST["repo_id"]); // Changed from "id" to "repo_id"
 
         if (!$repo || $repo["user_id"] != $_SESSION["user_id"]) {
             ViewHelper::error404();
             return;
         }
 
-        RepoDB::delete($repo["id"]);
+        $repoId = $repo["id"];
+        $repoName = $repo["name"];
+        $userId = $_SESSION["user_id"];
+
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/githab/uploads/" . $userId . "/" . $repoName;
+        self::deleteDirectory($uploadDir);
+
+        RepoDB::delete($repoId);
+
         ViewHelper::redirect(BASE_URL . "repo");
     }
+
+    private static function deleteDirectory($dir)
+    {
+        if (!file_exists($dir)) {
+            return true;
+        }
+
+        if (!is_dir($dir)) {
+            unlink($dir);
+            return true;
+        }
+
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+
+            if (!self::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+        }
+
+        return rmdir($dir);
+    }
+
 
     public static function star()
     {
         if (!isset($_SESSION["user_id"])) {
-            if (ViewHelper::isAjax()) {
-                header('Content-Type: application/json');
-                echo json_encode(["error" => "Not logged in"]);
-                return;
-            }
-            ViewHelper::redirect(BASE_URL . "login");
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "message" => "Not logged in"]);
             return;
         }
 
         if (!isset($_POST["repo_id"]) || !isset($_POST["action"])) {
-            ViewHelper::error404();
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "message" => "Invalid request"]);
             return;
         }
 
         $repoId = $_POST["repo_id"];
         $action = $_POST["action"];
+        $userId = $_SESSION["user_id"];
 
-        if ($action === "star") {
-            StarDB::add($_SESSION["user_id"], $repoId);
-        } else {
-            StarDB::remove($_SESSION["user_id"], $repoId);
-        }
+        try {
+            if ($action == "star") {
+                StarDB::add($userId, $repoId);
+            } elseif ($action == "unstar") {
+                StarDB::remove($userId, $repoId);
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode(["success" => false, "message" => "Invalid action"]);
+                return;
+            }
 
-        if (ViewHelper::isAjax()) {
+            $starCount = StarDB::getCount($repoId);
+
             header('Content-Type: application/json');
-            echo json_encode([
-                "success" => true,
-                "isStarred" => $action === "star",
-                "starCount" => StarDB::getCount($repoId)
-            ]);
-            return;
+            echo json_encode(["success" => true, "starCount" => $starCount]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "message" => $e->getMessage()]);
         }
-
-        ViewHelper::redirect(BASE_URL . "repo/detail?id=" . $repoId);
     }
 
-    public static function fork(){
+    public static function fork()
+    {
         if (!isset($_SESSION["user_id"])) {
             ViewHelper::redirect(BASE_URL . "login");
             return;
@@ -314,14 +348,44 @@ class RepoController
             $originalBranch = BranchDB::getDefault($repoId);
             BranchDB::create($newRepoId, $originalBranch["name"], true);
 
-            // Copy files from the original repository
-            $originalFiles = RepoDB::getFilesByRepoId($repoId);
-            foreach ($originalFiles as $originalFile) {
-                RepoDB::insertFile(
-                    $newRepoId,
-                    $originalFile["file_name"],
-                    $originalFile["file_path"] // Ensure this path is valid for the new repo
-                );
+            // Get the files for the original repository
+            $files = RepoDB::getFilesByRepoId($repoId);
+            error_log("Files: " . print_r($files, true));
+
+            // Define the base directory for uploads
+            $uploadBaseDir = $_SERVER['DOCUMENT_ROOT'] . "/githab/";
+
+            // Get the original repository's directory
+            $originalRepoDir = $uploadBaseDir . "uploads/" . $originalRepo["user_id"] . "/" . $originalRepo["name"];
+            error_log("Original Repo Dir: " . $originalRepoDir);
+
+            // Create the new repository's directory
+            $newRepoDir = $uploadBaseDir . "uploads/" . $_SESSION["user_id"] . "/" . $originalRepo["name"];
+            error_log("New Repo Dir: " . $newRepoDir);
+
+            if (!is_dir($newRepoDir)) {
+                mkdir($newRepoDir, 0777, true);
+                error_log("New Repo Dir Created: " . $newRepoDir);
+            }
+
+            // Copy the files to the new repository's directory and create new entries in the uploads table
+            foreach ($files as $file) {
+                $originalFilePath = $uploadBaseDir . $file["file_path"];
+                $newFilePath = $newRepoDir . "/" . $file["file_name"];
+                error_log("Original File Path: " . $originalFilePath);
+                error_log("New File Path: " . $newFilePath);
+
+                if (file_exists($originalFilePath)) {
+                    if (copy($originalFilePath, $newFilePath)) {
+                        error_log("File Copied: " . $originalFilePath . " to " . $newFilePath);
+                        // Create a new entry in the uploads table for the forked repository
+                        RepoDB::insertFile($newRepoId, $file["file_name"], "uploads/" . $_SESSION["user_id"] . "/" . $originalRepo["name"] . "/" . $file["file_name"]);
+                    } else {
+                        error_log("Failed to copy file: " . $originalFilePath . " to " . $newFilePath);
+                    }
+                } else {
+                    error_log("File Does Not Exist: " . $originalFilePath);
+                }
             }
 
             ViewHelper::redirect(BASE_URL . "repo/detail?id=" . $newRepoId);

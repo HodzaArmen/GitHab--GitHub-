@@ -20,8 +20,15 @@ class CommitController {
         }
 
         $branches = BranchDB::getByRepo($repoId);
-        $currentBranch = isset($_GET["branch"]) ? $_GET["branch"] : $branches[0]["name"];
-        $commits = CommitDB::getByRepo($repoId, $currentBranch);
+        $currentBranchName = isset($_GET["branch"]) ? $_GET["branch"] : $branches[0]["name"];
+        $currentBranchId = null;
+        foreach ($branches as $branch) {
+            if ($branch["name"] == $currentBranchName) {
+                $currentBranchId = $branch["id"];
+                break;
+            }
+        }
+        $commits = CommitDB::getByRepo($repoId, $currentBranchName);
 
         $starCount = StarDB::getCount($repoId);
         $isStarred = isset($_SESSION["user_id"]) ? StarDB::isStarred($_SESSION["user_id"], $repoId) : false;
@@ -31,7 +38,8 @@ class CommitController {
         ViewHelper::render("view/commit/list.php", [
             "repo" => $repo,
             "branches" => $branches,
-            "currentBranch" => $currentBranch,
+            "currentBranch" => $currentBranchName,
+            "currentBranchId" => $currentBranchId,
             "commits" => $commits,
             "canEdit" => isset($_SESSION["user_id"]) && ($repo["user_id"] == $_SESSION["user_id"]),
             "isStarred" => $isStarred,
