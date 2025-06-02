@@ -6,7 +6,7 @@
                     <h3 class="text-center">Sign in to GitHab</h3>
                 </div>
                 <div class="card-body">
-                    <?php if (isset($error)): ?>
+                    <?php if (isset($error) && !empty($error)): ?>
                         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                     <?php endif; ?>
                     
